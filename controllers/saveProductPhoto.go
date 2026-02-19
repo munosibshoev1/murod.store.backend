@@ -183,10 +183,10 @@ const (
 	maxImageHeight    = 1500
 	previewSize       = 300
 	s3Endpoint        = "s3.ru1.storage.beget.cloud"
-	s3AccessKey       = "QSJBZ1JPEDIY779JC539"
-	s3SecretKey       = "gFxzngf9mT3jNl8ABsnCnOtrCYUFo9Q3jePCUDMk"
-	s3Bucket          = "c335b5a303c2-muf56"
-	cdnDomain         = "storage.nadim.shop"
+	s3AccessKey       = "44UGWLYYIC06T436IFZW"
+	s3SecretKey       = "pQth8Ayzs9ULSX3g7WXDN66QIuZYb0pp0Lfr86cA"
+	s3Bucket          = "c335b5a303c2-murod"
+	cdnDomain         = "storage.murod.store"
 )
 
 var s3Client *minio.Client
