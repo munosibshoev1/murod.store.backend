@@ -253,11 +253,7 @@ func GetStorekeeperLocations(c *gin.Context) {
 
 func GetDeliveryLocations(c *gin.Context) {
     deliveryLocations := []gin.H{
-        {"location": "Вамар", "cost": 10},
-        {"location": "Дерзуд", "cost": 15},
-        {"location": "Барушан", "cost": 20},
-        {"location": "Пастхуф", "cost": 20},
-        {"location": "Шучанд", "cost": 15},
+        {"location": "Хорог", "cost": 10},
     }
 
     c.JSON(http.StatusOK, deliveryLocations)
