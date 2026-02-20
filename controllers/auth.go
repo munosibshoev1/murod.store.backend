@@ -6,11 +6,12 @@ import (
 	"backend/utils"
 	"bytes"
 	"context"
-	"crypto/rand"
-	"encoding/base64"
+	// "crypto/rand"
+	// "encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"log"
 	"net/http"
 	"time"
@@ -23,13 +24,12 @@ import (
 // Temporary storage for verification codes
 var verificationCodes = make(map[string]string)
 var codeExpiry = make(map[string]time.Time)
-
 // Generate random verification code
 func generateVerificationCode() string {
-    b := make([]byte, 6)
-    rand.Read(b)
-    return base64.StdEncoding.EncodeToString(b)
+	rand.Seed(time.Now().UnixNano())
+	return fmt.Sprintf("%06d", rand.Intn(1000000))
 }
+
 
 // RequestPasswordReset handles password reset requests
 func RequestPasswordReset(c *gin.Context) {

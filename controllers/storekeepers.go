@@ -98,74 +98,86 @@ func AddStorekeeper(c *gin.Context) {
 }
 
 func UpdateStorekeeper(c *gin.Context) {
-    storekeeperID := c.Param("id")
-    var updateData models.Storekeeper
+	storekeeperID := c.Param("id")
+	var updateData models.Storekeeper
 
-    if err := c.ShouldBindJSON(&updateData); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	if err := c.ShouldBindJSON(&updateData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    update := bson.M{}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-    if updateData.Phone != "" {
-        isUsed, err := isPhoneNumberInUse(updateData.Phone)
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking phone number"})
-            return
-        }
-        if isUsed {
-            var existingStorekeeper models.Storekeeper
-            err = config.StorekeeperCollection.FindOne(context.TODO(), bson.M{"phone": updateData.Phone}).Decode(&existingStorekeeper)
-            if err == nil && existingStorekeeper.ID.Hex() != storekeeperID {
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number already in use"})
-                return
-            }
-        }
-        update["phone"] = updateData.Phone
-    }
+	oid, err := primitive.ObjectIDFromHex(storekeeperID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid storekeeper ID"})
+		return
+	}
 
-    if updateData.FirstName != "" {
-        update["first_name"] = updateData.FirstName
-    }
-    if updateData.LastName != "" {
-        update["last_name"] = updateData.LastName
-    }
-    if updateData.BirthDate != "" {
-        update["birth_date"] = updateData.BirthDate
-    }
-    if updateData.Location != "" {
-        update["location"] = updateData.Location
-    }
-    if updateData.Password != "" {
-        hashedPassword, err := utils.HashPassword(updateData.Password)
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
-            return
-        }
-        update["password"] = hashedPassword
-    }
+	update := bson.M{}
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
+	if updateData.Phone != "" {
+		isUsed, err := isPhoneNumberInUse(updateData.Phone)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking phone number"})
+			return
+		}
+		if isUsed {
+			var existingStorekeeper models.Storekeeper
+			err = config.StorekeeperCollection.
+				FindOne(ctx, bson.M{"phone": updateData.Phone}).
+				Decode(&existingStorekeeper)
 
-    oid, err := primitive.ObjectIDFromHex(storekeeperID)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid storekeeper ID"})
-        return
-    }
+			if err == nil && existingStorekeeper.ID != oid {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number already in use"})
+				return
+			}
+		}
+		update["phone"] = updateData.Phone
+	}
 
-    _, err = config.StorekeeperCollection.UpdateOne(
-        ctx,
-        bson.M{"_id": oid},
-        bson.M{"$set": update},
-    )
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating storekeeper"})
-        return
-    }
+	if updateData.FirstName != "" {
+		update["first_name"] = updateData.FirstName
+	}
+	if updateData.LastName != "" {
+		update["last_name"] = updateData.LastName
+	}
+	if updateData.BirthDate != "" {
+		update["birth_date"] = updateData.BirthDate
+	}
+	if updateData.Location != "" {
+		update["location"] = updateData.Location
+	}
+	if updateData.Password != "" {
+		hashedPassword, err := utils.HashPassword(updateData.Password)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
+			return
+		}
+		update["password"] = hashedPassword
+	}
 
-    c.JSON(http.StatusOK, gin.H{"message": "Storekeeper updated successfully"})
+	if len(update) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
+		return
+	}
+
+	res, err := config.StorekeeperCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": oid},
+		bson.M{"$set": update},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating storekeeper"})
+		return
+	}
+	if res.MatchedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Storekeeper not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Storekeeper updated successfully"})
 }
 
 func GetStorekeeper(c *gin.Context) {
