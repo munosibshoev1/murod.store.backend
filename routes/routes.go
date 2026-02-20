@@ -55,7 +55,7 @@ func InitializeRoutes(router *gin.Engine) {
 
 		admin.GET("/storekeepers", controllers.ListStorekeepers)
 		admin.POST("/storekeepers", controllers.AddStorekeeper)
-		admin.PUT("/storekeepers/:id", controllers.UpdateStorekeeper)
+		admin.PUT("/storekeeper/:id", controllers.UpdateStorekeeper)
 		admin.GET("/storekeepers/:id", controllers.GetStorekeeper)
 
 		admin.GET("/cashiers", controllers.ListCashiers)
