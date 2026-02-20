@@ -38,17 +38,18 @@ type ProductInput struct {
 	Barcode  string  `json:"barcode" binding:"required"`
 	Quantity float64 `json:"quantity" binding:"required"`
 }
+
 func CreateCustomerOrder(c *gin.Context) {
 	var order struct {
-		Products         []models.ProductQuantity `json:"products" binding:"required"`
-		DeliveryMethod   string                   `json:"delivery_method" binding:"required"`
-		DeliveryAddress  string                   `json:"delivery_address"`
-		DeliveryCost     float64                  `json:"deliverycost"`
-		PaymentMethod    string                   `json:"payment_method" binding:"required"`
-		CardNumber       string                   `json:"card_number"`
-		Tranid           string                   `json:"tranid"`
-		Clientid         string                   `json:"clientid"`
-		CashierID        string                   `json:"cashierid"`
+		Products        []models.ProductQuantity `json:"products" binding:"required"`
+		DeliveryMethod  string                   `json:"delivery_method" binding:"required"`
+		DeliveryAddress string                   `json:"delivery_address"`
+		DeliveryCost    float64                  `json:"deliverycost"`
+		PaymentMethod   string                   `json:"payment_method" binding:"required"`
+		CardNumber      string                   `json:"card_number"`
+		Tranid          string                   `json:"tranid"`
+		Clientid        string                   `json:"clientid"`
+		CashierID       string                   `json:"cashierid"`
 	}
 
 	if err := c.ShouldBindJSON(&order); err != nil {
@@ -109,7 +110,7 @@ func CreateCustomerOrder(c *gin.Context) {
 			return
 		}
 		peshraftTransactionID = peshraftResp.Transaction.ID
-		amountPaid := math.Round((total + order.DeliveryCost) * 100) / 100
+		amountPaid := math.Round((total+order.DeliveryCost)*100) / 100
 		initialTxns = []models.PeshraftTxn{{ID: peshraftTransactionID, Amount: amountPaid}}
 	} else if order.PaymentMethod == "DC" && order.Tranid == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Transaction ID is required for DC payment"})
@@ -157,7 +158,7 @@ func CreateCustomerOrder(c *gin.Context) {
 		}
 	}
 
-	totalAmount := math.Round((total + order.DeliveryCost) * 100) / 100
+	totalAmount := math.Round((total+order.DeliveryCost)*100) / 100
 	newOrder := models.CustomerOrder{
 		ID:                    primitive.NewObjectID(),
 		Products:              orderedProducts,
@@ -170,7 +171,7 @@ func CreateCustomerOrder(c *gin.Context) {
 		Tranid:                order.Tranid,
 		Clientid:              order.Clientid,
 		Status:                "Order confirm, in process in stock!",
-		Total:                 math.Round(total * 100) / 100,
+		Total:                 math.Round(total*100) / 100,
 		TotalAmount:           totalAmount,
 		CreatedAt:             time.Now(),
 		ViewToken:             uuid.NewString(),
@@ -182,7 +183,7 @@ func CreateCustomerOrder(c *gin.Context) {
 		return
 	}
 
-	utils.SendSMS(removePlusFromPhone("+992114440000"), fmt.Sprintf("Клиент %s оформил заказ на сумму %.2f сомонӣ", clientName, newOrder.TotalAmount))
+	utils.SendSMS(removePlusFromPhone("+992111143040"), fmt.Sprintf("Клиент %s оформил заказ на сумму %.2f сомонӣ", clientName, newOrder.TotalAmount))
 
 	if order.DeliveryMethod == "Рушон Вамар" || order.DeliveryMethod == "courier" {
 		var storekeeper struct {
@@ -199,7 +200,6 @@ func CreateCustomerOrder(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Order created successfully", "order_id": newOrder.ID.Hex()})
 }
-
 
 func aggregateProducts(products []models.ProductQuantity) []models.ProductQuantity {
 	agg := map[string]float64{}
@@ -224,7 +224,8 @@ func processProducts(products []models.ProductQuantity, isRetail bool) (
 		ExpirationDates []string
 	},
 	error,
-) {	total := 0.0
+) {
+	total := 0.0
 	ordered := []models.OrderedProduct{}
 	stockUpdates := make(map[string]struct {
 		Quantities      []float64
@@ -242,7 +243,7 @@ func processProducts(products []models.ProductQuantity, isRetail bool) (
 			return 0, nil, nil, fmt.Errorf("Недостаточно товара на складе: %s. Доступно %.2f, требуется %.2f", stock.Name, totalStock, p.Quantity)
 		}
 		unitPrice := stock.Whosaleprice
-		subtotal := math.Round(p.Quantity * unitPrice * 100) / 100
+		subtotal := math.Round(p.Quantity*unitPrice*100) / 100
 		total += subtotal
 		sortedQuantities, sortedExp := sortBatchesByExpirationFloat(stock.Quantities, stock.ExpirationDate)
 		stockUpdates[p.Barcode] = struct {
@@ -261,13 +262,12 @@ func processProducts(products []models.ProductQuantity, isRetail bool) (
 		}
 		if isRetail {
 			ord.Retailprice = stock.Retailprice
-			ord.TotalRetailprice = math.Round(p.Quantity * stock.Retailprice * 100) / 100
+			ord.TotalRetailprice = math.Round(p.Quantity*stock.Retailprice*100) / 100
 		}
 		ordered = append(ordered, ord)
 	}
 	return total, ordered, stockUpdates, nil
 }
-
 
 // func AdminUpdateOrderQuantities(c *gin.Context) {
 // 	orderID := c.Param("orderID")
@@ -421,7 +421,6 @@ func processProducts(products []models.ProductQuantity, isRetail bool) (
 // 	c.JSON(http.StatusOK, gin.H{"message": "Order updated successfully"})
 // }
 
-
 func extractPeshraftTransactionID(response string) (string, error) {
 	var resp struct {
 		Transaction struct {
@@ -437,7 +436,6 @@ func extractPeshraftTransactionID(response string) (string, error) {
 	}
 	return resp.Transaction.ID, nil
 }
-
 
 func ReturnToStock(ctx context.Context, barcode string, qty float64) error {
 	var product models.Product
@@ -529,23 +527,3 @@ func sortBatchesByExpirationFloat(qs []float64, dates []string) ([]float64, []st
 	}
 	return sortedQs, sortedDates
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

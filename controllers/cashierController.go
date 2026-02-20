@@ -2687,7 +2687,7 @@ func CreateCustomerOrderInternal(ctx context.Context, input models.CustomerOrder
 		return err
 	}
 
-	utils.SendSMS(removePlusFromPhone("+992114440000"), fmt.Sprintf("Клиент %s оформил заказ на сумму %.2f сомоні", clientName, newOrder.TotalAmount))
+	utils.SendSMS(removePlusFromPhone("+992111143040"), fmt.Sprintf("Клиент %s оформил заказ на сумму %.2f сомоні", clientName, newOrder.TotalAmount))
 	return nil
 }
 
