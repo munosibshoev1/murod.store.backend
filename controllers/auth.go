@@ -185,7 +185,7 @@ func ResetPassword(c *gin.Context) {
     var input struct {
         Phone       string `json:"phone" binding:"required"`
         Code        string `json:"code" binding:"required"`
-        NewPassword string `json:"newpassword" binding:"required"`
+        NewPassword string `json:"newPassword" binding:"required"`
     }
     if err := c.ShouldBindJSON(&input); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
