@@ -185,7 +185,7 @@ func ResetPassword(c *gin.Context) {
     var input struct {
         Phone       string `json:"phone" binding:"required"`
         Code        string `json:"code" binding:"required"`
-        NewPassword string `json:"newPassword" binding:"required"`
+        NewPassword string `json:"newpassword" binding:"required"`
     }
     if err := c.ShouldBindJSON(&input); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -212,6 +212,13 @@ func ResetPassword(c *gin.Context) {
 
     // Attempt to update user
     updateResult, err := config.UserCollection.UpdateOne(ctx, bson.M{"phone": input.Phone}, bson.M{"$set": bson.M{"password": hashedPassword}})
+    if err != nil {
+        log.Println("Error updating user password:", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating password"})
+        return
+    }
+	// Attempt to update user
+    updateResult, err = config.ClientCollection.UpdateOne(ctx, bson.M{"phone": input.Phone}, bson.M{"$set": bson.M{"password": hashedPassword}})
     if err != nil {
         log.Println("Error updating user password:", err)
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating password"})
