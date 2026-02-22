@@ -67,7 +67,7 @@ func RequestPasswordReset(c *gin.Context) {
 	codeExpiry[input.Phone] = time.Now().Add(2 * time.Minute)
 
 	// Формируем сообщение с кодом
-	message := fmt.Sprintf("Your verification code is: %s", code)
+	message := fmt.Sprintf("Рамзи Шумо барои тасдиқ: %s. Рамзро ба шахси сеюм надиҳед!", code)
 
 	// Отправляем SMS через внешний сервис
 	err = sendSMS(removePlusFromPhone(input.Phone), message)
