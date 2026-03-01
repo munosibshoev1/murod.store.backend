@@ -183,7 +183,7 @@ func CreateCustomerOrder(c *gin.Context) {
 		return
 	}
 
-	utils.SendSMS(removePlusFromPhone("+992111143040"), fmt.Sprintf("Клиент %s оформил заказ на сумму %.2f сомонӣ", clientName, newOrder.TotalAmount))
+	utils.SendSMS(removePlusFromPhone("+992937518880"), fmt.Sprintf("Клиент %s оформил заказ на сумму %.2f сомонӣ", clientName, newOrder.TotalAmount))
 
 	if order.DeliveryMethod == "Рушон Вамар" || order.DeliveryMethod == "courier" {
 		var storekeeper struct {

@@ -132,7 +132,7 @@ func WriteOffProductsNEW(c *gin.Context) {
 	}
 
 	if role == "storekeeper" {
-		adminPhone := "+992111143040"
+		adminPhone := "+992937518880"
 		message := fmt.Sprintf("Складовщик оформил списание на сумму %.2f сомонӣ. Подтвердите в системе.", totalWriteOffValue)
 		utils.SendSMS(removePlusFromPhone(adminPhone), message)
 	}
