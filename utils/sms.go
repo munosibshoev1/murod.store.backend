@@ -47,7 +47,7 @@ func SendSMS(phone string, message string) error {
 	}
 
 	// URL вашего сервиса для отправки SMS
-	smsServiceURL := "https://sms.matrix.tj/sms"
+	smsServiceURL := "https://sms.matrix.tj/smsmurod"
 
 	// Формируем запрос
 	payload := map[string]string{
